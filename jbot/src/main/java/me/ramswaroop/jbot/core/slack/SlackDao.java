@@ -9,12 +9,10 @@ import me.ramswaroop.jbot.core.slack.models.RTM;
 import me.ramswaroop.jbot.core.slack.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,14 +24,12 @@ import java.util.List;
  * @author ramswaroop
  * @version 14/08/2016
  */
-@Repository
 public class SlackDao {
 
     private static final Logger logger = LoggerFactory.getLogger(SlackDao.class);
     /**
      * Endpoint for RTM.start()
      */
-    @Value("${rtmUrl}")
     private String rtmUrl;
     /**
      * RTM object constructed from <a href="https://api.slack.com/methods/rtm.start">RTM.start()</a>.
@@ -43,6 +39,10 @@ public class SlackDao {
      * Rest template to make http calls.
      */
     private RestTemplate restTemplate;
+
+    public SlackDao(String rtmUrl) {
+        this.rtmUrl = rtmUrl;
+    }
 
     public RTM startRTM(String slackToken) {
         try {

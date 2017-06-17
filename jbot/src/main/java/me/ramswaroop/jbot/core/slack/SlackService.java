@@ -2,9 +2,6 @@ package me.ramswaroop.jbot.core.slack;
 
 import me.ramswaroop.jbot.core.slack.models.RTM;
 import me.ramswaroop.jbot.core.slack.models.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +10,16 @@ import java.util.List;
  * @author ramswaroop
  * @version 14/08/2016
  */
-@Service
-@Scope("prototype")
 public class SlackService {
 
-    @Autowired
     private SlackDao slackDao;
     private User currentUser;
     private List<String> dmChannels;
     private String webSocketUrl;
+
+    public SlackService(String rtmUrl) {
+        this.slackDao = new SlackDao(rtmUrl);
+    }
 
     /**
      * Start a RTM connection. Fetch the web socket url to connect to, current user details

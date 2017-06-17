@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -64,16 +63,7 @@ public abstract class Bot {
     /**
      * Service to access Slack APIs.
      */
-    @Autowired
     protected SlackService slackService;
-
-    /**
-     * Class extending this must implement this as it's
-     * required to make the initial RTM.start() call.
-     *
-     * @return
-     */
-    public abstract String getSlackToken();
 
     /**
      * An instance of the Bot is required by
@@ -83,10 +73,16 @@ public abstract class Bot {
      */
     public abstract Bot getSlackBot();
 
+    public Bot(String rtmUrl, String slackToken) {
+        this.slackService = new SlackService(rtmUrl);
+        init();
+        this.startWebSocketConnection(slackToken);
+    }
+
     /**
      * Construct a map of all the controller methods to handle RTM Events.
      */
-    public Bot() {
+    private void init() {
         Method[] methods = this.getClass().getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(Controller.class)) {
@@ -392,10 +388,10 @@ public abstract class Bot {
     /**
      * Entry point where the web socket connection starts
      * and after which your bot becomes live.
+     * @param slackToken
      */
-    @PostConstruct
-    private void startWebSocketConnection() {
-        slackService.startRTM(getSlackToken());
+    private void startWebSocketConnection(String slackToken) {
+        slackService.startRTM(slackToken);
         if (slackService.getWebSocketUrl() != null) {
             WebSocketConnectionManager manager = new WebSocketConnectionManager(client(), handler(), slackService.getWebSocketUrl());
             manager.start();
