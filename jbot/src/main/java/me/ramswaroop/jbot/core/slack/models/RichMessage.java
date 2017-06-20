@@ -5,15 +5,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import lombok.Data;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author ramswaroop
  * @version 21/06/2016
  */
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RichMessage {
@@ -23,6 +24,7 @@ public class RichMessage {
     private String iconEmoji;
     private String channel;
     private String text;
+    private Boolean mrkdwn;
     @JsonProperty("response_type")
     private String responseType;
     private Attachment[] attachments;
@@ -39,73 +41,34 @@ public class RichMessage {
         return this;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getIconEmoji() {
-        return iconEmoji;
-    }
-
-    public void setIconEmoji(String iconEmoji) {
-        this.iconEmoji = iconEmoji;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
-    public void setChannel(String channel) {
-        this.channel = channel;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getResponseType() {
-        return responseType;
-    }
-
-    public void setResponseType(String responseType) {
-        this.responseType = responseType;
-    }
-
-    public Attachment[] getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(Attachment[] attachments) {
-        this.attachments = attachments;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public MultiValueMap<String, String> toValueMap(ObjectMapper mapper) throws JsonProcessingException {
+    public Map<String, Object> toValueMap(ObjectMapper mapper) throws JsonProcessingException {
         encodedMessage();
 
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.put("token", Arrays.asList(token));
-        map.put("username", Arrays.asList(username));
-        map.put("iconEmoji", Arrays.asList(iconEmoji));
-        map.put("channel", Arrays.asList(channel));
-        map.put("text", Arrays.asList(text));
-        map.put("responseType", Arrays.asList(responseType));
-        map.put("attachments", Arrays.asList(mapper.writeValueAsString(attachments)));
+        Map<String, Object> map = new HashMap<>();
+        if (token != null) {
+            map.put("token", token);
+        }
+        if (username != null) {
+            map.put("username", username);
+        }
+        if (iconEmoji != null) {
+            map.put("iconEmoji", iconEmoji);
+        }
+        if (channel != null) {
+            map.put("channel", channel);
+        }
+        if (text != null) {
+            map.put("text", text);
+        }
+        if (responseType != null) {
+            map.put("responseType", responseType);
+        }
+        if (attachments != null && attachments.length > 0) {
+            map.put("attachments", mapper.writeValueAsString(attachments));
+        }
+        if (mrkdwn != null) {
+            map.put("mrkdwn", mrkdwn);
+        }
         return map;
     }
 }
