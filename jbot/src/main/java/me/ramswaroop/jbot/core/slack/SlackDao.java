@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.ramswaroop.jbot.core.slack.models.RTM;
+import me.ramswaroop.jbot.core.slack.models.RTMConnect;
+import me.ramswaroop.jbot.core.slack.models.RTMStart;
 import me.ramswaroop.jbot.core.slack.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class SlackDao {
     /**
      * RTM object constructed from <a href="https://api.slack.com/methods/rtm.start">RTM.start()</a>.
      */
-    private RTM rtm;
+    private RTMStart rtm;
     /**
      * Rest template to make http calls.
      */
@@ -44,21 +45,21 @@ public class SlackDao {
         this.rtmUrl = rtmUrl;
     }
 
-    public RTM startRTM(String slackToken) {
+    public RTMStart startRTM(String slackToken) {
         try {
             restTemplate = new RestTemplate();
-            rtm = new RTM();
+            rtm = new RTMStart();
             // Custom Deserializers
             List<HttpMessageConverter<?>> httpMessageConverters = new ArrayList<>();
             MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
             Jackson2ObjectMapperBuilder mapperBuilder = new Jackson2ObjectMapperBuilder();
-            mapperBuilder.deserializerByType(RTM.class, new JsonDeserializer<RTM>() {
+            mapperBuilder.deserializerByType(RTMStart.class, new JsonDeserializer<RTMStart>() {
                 @Override
-                public RTM deserialize(JsonParser p, DeserializationContext ctxt) {
+                public RTMStart deserialize(JsonParser p, DeserializationContext ctxt) {
                     try {
                         final ObjectMapper objectMapper = new ObjectMapper();
                         JsonNode node = p.readValueAsTree();
-                        RTM rtm = new RTM();
+                        RTMStart rtm = new RTMStart();
                         rtm.setWebSocketUrl(node.get("url").asText());
                         rtm.setUser(objectMapper.treeToValue(node.get("self"), User.class));
                         List<String> dmChannels = new ArrayList<>();
@@ -84,7 +85,7 @@ public class SlackDao {
             httpMessageConverters.add(jsonConverter);
             restTemplate.setMessageConverters(httpMessageConverters);
 
-            ResponseEntity<RTM> response = restTemplate.getForEntity(rtmUrl, RTM.class, slackToken);
+            ResponseEntity<RTMStart> response = restTemplate.getForEntity(rtmUrl, RTMStart.class, slackToken);
             if (response.getBody() != null) {
                 rtm.setWebSocketUrl(response.getBody().getWebSocketUrl());
                 rtm.setDmChannels(response.getBody().getDmChannels());
@@ -99,5 +100,25 @@ public class SlackDao {
         }
 
         return rtm;
+    }
+
+    public RTMConnect connectRTM(String slackToken) throws BotException {
+        try {
+            final RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<RTMConnect> response = restTemplate.getForEntity(rtmUrl, RTMConnect.class, slackToken);
+
+            RTMConnect body = response.getBody();
+            if (!body.isOk()) {
+                logger.error("RTM connection failed. {}", body);
+                throw new BotException(BotException.ERRORS.NOT_OK);
+            }
+
+            logger.info("RTM connection success. {}", body);
+
+            return body;
+        } catch (RestClientException e) {
+            logger.error("RTM connection error. Exception: {}", e);
+            throw new BotException(BotException.ERRORS.SERIALIZATION);
+        }
     }
 }

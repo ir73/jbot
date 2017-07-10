@@ -8,7 +8,7 @@ import java.util.List;
  * Created by ramswaroop on 12/06/2016.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RTM {
+public class RTMStart {
 
     private String webSocketUrl;
     private List<String> dmChannels;

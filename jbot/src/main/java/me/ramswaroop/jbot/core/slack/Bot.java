@@ -73,7 +73,7 @@ public abstract class Bot {
      */
     public abstract Bot getSlackBot();
 
-    public Bot(String rtmUrl, String slackToken) {
+    public Bot(String rtmUrl, String slackToken) throws BotException {
         this.slackService = new SlackService(rtmUrl);
         init();
         this.startWebSocketConnection(slackToken);
@@ -390,8 +390,8 @@ public abstract class Bot {
      * and after which your bot becomes live.
      * @param slackToken
      */
-    private void startWebSocketConnection(String slackToken) {
-        slackService.startRTM(slackToken);
+    private void startWebSocketConnection(String slackToken) throws BotException {
+        slackService.connectRTM(slackToken);
         if (slackService.getWebSocketUrl() != null) {
             WebSocketConnectionManager manager = new WebSocketConnectionManager(client(), handler(), slackService.getWebSocketUrl());
             manager.start();

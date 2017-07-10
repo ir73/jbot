@@ -1,6 +1,7 @@
 package me.ramswaroop.jbot.core.slack;
 
-import me.ramswaroop.jbot.core.slack.models.RTM;
+import me.ramswaroop.jbot.core.slack.models.RTMConnect;
+import me.ramswaroop.jbot.core.slack.models.RTMStart;
 import me.ramswaroop.jbot.core.slack.models.User;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class SlackService {
     private User currentUser;
     private List<String> dmChannels;
     private String webSocketUrl;
+    private List<User> users;
 
     public SlackService(String rtmUrl) {
         this.slackDao = new SlackDao(rtmUrl);
@@ -28,10 +30,17 @@ public class SlackService {
      * @param slackToken
      */
     public void startRTM(String slackToken) {
-        RTM rtm = slackDao.startRTM(slackToken);
+        RTMStart rtm = slackDao.startRTM(slackToken);
         currentUser = rtm.getUser();
         dmChannels = rtm.getDmChannels();
         webSocketUrl = rtm.getWebSocketUrl();
+        users = rtm.getUsers();
+    }
+
+    public void connectRTM(String slackToken) throws BotException {
+        RTMConnect rtm = slackDao.connectRTM(slackToken);
+        currentUser = rtm.getSelf();
+        webSocketUrl = rtm.getUrl();
     }
 
     /**
@@ -70,5 +79,9 @@ public class SlackService {
 
     public void setWebSocketUrl(String webSocketUrl) {
         this.webSocketUrl = webSocketUrl;
+    }
+
+    public List<User> getUsers() {
+        return users;
     }
 }
