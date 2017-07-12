@@ -13,8 +13,11 @@ import java.util.List;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Attachment {
 	private String fallback;
+	@JsonProperty("callback_id")
+	private String callbackId;
 	private String color;
 	private String pretext;
 	@JsonProperty("author_name")
